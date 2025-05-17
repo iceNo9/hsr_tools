@@ -1,0 +1,7 @@
+opencv_python
+onnxruntime-directml
+nuitka
+shapely
+pyclipper
+numpy
+Pillow

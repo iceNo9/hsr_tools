@@ -1,0 +1,169 @@
+boxes:
+  backpack_type:
+    name: backpack_type
+    position_end:
+    - 210
+    - 95
+    position_start:
+    - 100
+    - 65
+    resolution:
+    - 1920
+    - 1080
+  relic_area:
+    name: relic_area
+    position_end:
+    - 1250
+    - 940
+    position_start:
+    - 127
+    - 200
+    resolution:
+    - 1920
+    - 1080
+  relic_level:
+    name: relic_level
+    position_end:
+    - 1500
+    - 345
+    position_start:
+    - 1410
+    - 311
+    resolution:
+    - 1920
+    - 1080
+  relic_location:
+    name: relic_location
+    position_end:
+    - 1500
+    - 310
+    position_start:
+    - 1410
+    - 280
+    resolution:
+    - 1920
+    - 1080
+  relic_main_name:
+    name: relic_main_name
+    position_end:
+    - 1700
+    - 433
+    position_start:
+    - 1440
+    - 395
+    resolution:
+    - 1920
+    - 1080
+  relic_main_value:
+    name: relic_main_value
+    position_end:
+    - 1842
+    - 433
+    position_start:
+    - 1701
+    - 395
+    resolution:
+    - 1920
+    - 1080
+  relic_name:
+    name: relic_name
+    position_end:
+    - 1650
+    - 160
+    position_start:
+    - 1400
+    - 130
+    resolution:
+    - 1920
+    - 1080
+  relic_sub1_name:
+    name: relic_sub1_name
+    position_end:
+    - 1700
+    - 477
+    position_start:
+    - 1440
+    - 439
+    resolution:
+    - 1920
+    - 1080
+  relic_sub1_value:
+    name: relic_sub1_value
+    position_end:
+    - 1842
+    - 477
+    position_start:
+    - 1701
+    - 439
+    resolution:
+    - 1920
+    - 1080
+  relic_sub2_name:
+    name: relic_sub2_name
+    position_end:
+    - 1700
+    - 515
+    position_start:
+    - 1440
+    - 478
+    resolution:
+    - 1920
+    - 1080
+  relic_sub2_value:
+    name: relic_sub2_value
+    position_end:
+    - 1842
+    - 515
+    position_start:
+    - 1701
+    - 478
+    resolution:
+    - 1920
+    - 1080
+  relic_sub3_name:
+    name: relic_sub3_name
+    position_end:
+    - 1700
+    - 553
+    position_start:
+    - 1440
+    - 516
+    resolution:
+    - 1920
+    - 1080
+  relic_sub3_value:
+    name: relic_sub3_value
+    position_end:
+    - 1842
+    - 553
+    position_start:
+    - 1701
+    - 516
+    resolution:
+    - 1920
+    - 1080
+  relic_sub4_name:
+    name: relic_sub4_name
+    position_end:
+    - 1700
+    - 591
+    position_start:
+    - 1440
+    - 554
+    resolution:
+    - 1920
+    - 1080
+  relic_sub4_value:
+    name: relic_sub4_value
+    position_end:
+    - 1842
+    - 591
+    position_start:
+    - 1701
+    - 554
+    resolution:
+    - 1920
+    - 1080
+resolution:
+- 1920
+- 1080
