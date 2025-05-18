@@ -13,15 +13,26 @@ def switch_to_window(title):
     time.sleep(0.5)  # 等待窗口激活
     return True
 
+def scroll_wheel_down_at(x, y, duration_sec, interval=0.1, amount=10):
+    """
+    鼠标移动到 (x, y)，然后持续滚轮向下滚动 duration_sec 秒
+    interval 是每次滚动间隔，amount 是滚动的“格数”
+    """
+    pyautogui.moveTo(x, y)
+    start_time = time.time()
+    while time.time() - start_time < duration_sec:
+        pyautogui.scroll(-amount)  # 负数向下滚动
+        time.sleep(interval)
+        
 def press_key(key, delay=0.1):
     pyautogui.keyDown(key)
     time.sleep(delay)
     pyautogui.keyUp(key)
     time.sleep(0.2)  # 按键间隔
 
-def click_at(x, y):
+def click_at(x, y, delay=0.1):
     pyautogui.click(x, y)
-    time.sleep(0.3)
+    time.sleep(delay)
 
 def capture_fullscreen():
     # 直接截全屏，返回PIL图片对象

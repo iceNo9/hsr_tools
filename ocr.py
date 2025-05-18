@@ -99,7 +99,7 @@ class My_TS:
         tm = time.time()
         self.forward_img = img
         self.res = []
-        ocr_res = self.ts.ocrocr(img)
+        ocr_res = self.ts.ocr(img)
         for res in ocr_res:
             res = {'raw_text': res[1][0], 'box': np.array(res[0]), 'score': res[1][1]}
             res['box'] = [int(np.min(res['box'][:,0])),int(np.max(res['box'][:,0])),int(np.min(res['box'][:,1])),int(np.max(res['box'][:,1]))]

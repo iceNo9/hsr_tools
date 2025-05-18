@@ -30,6 +30,10 @@ class ONNXPaddleOcr(TextSystem):
     def ocr(self, img):
         dt_boxes, rec_res = self.__call__(img)
         return [(box.tolist(), res) for box, res in zip(dt_boxes, rec_res)]
+    
+    def det_text(self, img):
+        dt_boxes = self.text_detector(img)
+        return [(box.tolist(), None) for box in dt_boxes]
 
 
 def sav2Img(org_img, result, name="draw_ocr.jpg"):

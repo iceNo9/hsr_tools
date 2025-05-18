@@ -4,7 +4,22 @@ from relic import *
 from config import *
 from simulation import *
 import cv2
+from img_process import *
+import pygetwindow as gw
+import tkinter as tk
+from tkinter import messagebox
 
+def show_finished_message():
+    root = tk.Tk()
+    root.withdraw()  # 隐藏主窗口
+    messagebox.showinfo("提示", "已结束操作")
+    root.destroy()
+
+def is_window_foreground(title_substring):
+    active_win = gw.getActiveWindow()
+    if active_win is None:
+        return False
+    return title_substring.lower() in active_win.title.lower()
 
 def preprocess_image(img, mode=1):
     """
@@ -148,6 +163,9 @@ def enter_relic(manager, ocr_model):
 
     # 循环按E,OCR识别backpack_type区域数值和"遗器"相似度高为止,使用截图capture_fullscreen
     while True:
+        if not is_window_foreground("崩坏：星穹铁道"):
+            break
+
         # 截取全屏
         img = capture_fullscreen()
 
@@ -203,7 +221,51 @@ def traversal_ralic(manager, ocr_model):
         json.dump([relic.to_dict() for relic in relics], f, indent=4, ensure_ascii=False)
 
 
+def filter_boxes_by_area(boxes, min_area=200, max_area=10000):
+    """
+    过滤掉面积不在指定范围内的框。
+    输入: boxes 为 [(box_pts, None), ...]，其中 box_pts 为 4 个 [x, y] 点
+    返回: 过滤后的 boxes
+    """
+    filtered = []
+    for pts, label in boxes:
+        x_coords = [p[0] for p in pts]
+        y_coords = [p[1] for p in pts]
+        w = max(x_coords) - min(x_coords)
+        h = max(y_coords) - min(y_coords)
+        area = w * h
+        if min_area <= area <= max_area:
+            filtered.append((pts, label))
+    return filtered
 
+def get_last_row_last_column_center(boxes, row_threshold=10):
+    """
+    找出最后一行的最后一列框的中心点。
+    row_threshold: 判定为“同一行”的 y 坐标容差范围。
+    返回 (cx, cy) 或 None
+    """
+    if not boxes:
+        return None
+
+    # 计算中心点
+    centers = []
+    for pts, _ in boxes:
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        cx = sum(xs) / 4
+        cy = sum(ys) / 4
+        centers.append(((cx, cy), pts))
+
+    # 找最后一行（y 最大）
+    max_y = max(c[1] for (c, _) in centers)
+    last_row = [(c, pts) for (c, pts) in centers if abs(c[1] - max_y) <= row_threshold]
+
+    if not last_row:
+        return None
+
+    # 最后一行中，x 最大的中心点
+    bottom_right = max(last_row, key=lambda x: x[0][0])
+    return bottom_right[0]  # (cx, cy)
 
 if __name__ == "__main__":
     # 初始化 Box 管理器并导入定义好的 boxes.json
@@ -225,22 +287,80 @@ if __name__ == "__main__":
     
     # 读取图像
     # 转为灰度图
-    img = cv.imread('test4.png')  # 替换为你的图片路径
-    # x1, y1, x2, y2 = 130, 310, 245, 335,
-    x1, y1, x2, y2 = 127, 200, 1250, 940,
-    roi = img[y1:y2, x1:x2]  # 注意：先 y 后 x（行列顺序）
+    # x1, y1, x2, y2 = 130, 310, 245, 335  # 你的ROI框坐标
 
-    img_ret = preprocess_image(roi, mode=3)
+    # img = cv.imread('test6.png')  # 你的图片路径
 
-    # 显示图像
-    cv.imshow("Original", img)
-    cv.imshow("Process", img_ret)
+    # 截图,判断在遗器界面
+    switch_to_window("崩坏：星穹铁道")
 
-    ocr_test(manager, img_ret)
+    img = capture_fullscreen()
 
-    # 等待按键关闭
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # 识别背包类型
+    box = manager.format_box_scaled("backpack_type")
+    backpack_type = ocr_model.ocr_one_row(img, box)
+
+    while True:
+        if not is_window_foreground("崩坏：星穹铁道"):
+            break
+
+        # 滚动最下
+        scroll_wheel_down_at(1300, 500, duration_sec=0.5, interval=0.1, amount=10000)        
+
+        img = capture_fullscreen()
+
+        x1, y1, x2, y2 = 127, 200, 1250, 940,
+        # x1, y1, x2, y2 = 130, 310, 245, 335  # 你的ROI框坐标
+        roi = img[y1:y2, x1:x2]  # 裁剪区域，注意先y后x（行列）
+
+        roi_2 = find_dark_background_mask_3ch_origin(roi)  # 预处理图像
+
+        ret = ocr_model.ts.det_text(roi_2)  # 返回格式如你给的
+
+        pos = get_last_row_last_column_center(ret)  # 获取最后一行最后一列的中心点
+        
+        if pos is not None:
+            # 转回原图坐标（roi相对于原图偏移为 x1, y1）
+            pos_in_img = (pos[0] + x1, pos[1] + y1)
+        else:
+            pos_in_img = None
+
+        print("检测到的文本框：", ret)
+        print("最后一行最后一列的中心点坐标：", pos)
+        print("最后一行最后一列的中心点坐标（原图坐标）：", pos_in_img)
+        
+        # 点击坐标
+        if pos_in_img is not None:
+            click_at(pos_in_img[0], pos_in_img[1], delay=0.5)
+
+        # 截图,识别数据
+        img = capture_fullscreen()
+        relic = parse(manager, ocr_model, img)
+        print(relic.to_dict())
+
+        if relic.item_number < 5:
+            # 需要升级
+            click_at(1735, 985, delay=1)
+
+            # 自动添加
+            click_at(1790, 660, delay=1)
+
+            # 强化
+            click_at(1680, 990, delay=2)
+
+            press_key('esc', delay=1)
+
+            press_key('esc', delay=1)
+        else:
+            # 不需要升级
+            print("不需要升级")
+            break
+    
+    print("已结束操作")
+    # 弹窗提示操作结束
+    show_finished_message()
+
+
 
     # result = parse(manager, ocr_model, img)
     # print(result.to_dict())
